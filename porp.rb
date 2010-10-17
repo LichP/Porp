@@ -18,14 +18,19 @@ ORPNS = 'porp'
 class OrpModel
   attr_reader :id
 
-  def initialize
-    klass = self.class.to_s.downcase
-    @id = redis.incr("#{ORPNS}:#{klass}:uid")
-    redis.set("#{ORPNS}:#{klass}:id:#{id.to_s}", 1)
+  def initialize(id)
+    @id = id
   end
   
   def ==(other)
     @id.to_s == other.id.to_s
+  end
+  
+  def self.new_id
+    klass = self.name.downcase
+    id = redis.incr("#{ORPNS}:#{klass}:uid")
+    redis.set("#{ORPNS}:#{klass}:id:#{id.to_s}", 1)
+    id
   end
   
   def self.property(name)
@@ -49,12 +54,13 @@ end
 class StockEntity < OrpModel
   property :description
 
-  def initialize(description)
-    super()
-    self.description = description
+  def self.create(description)
+    new_stock_entity = self.new(self.new_id)
+    new_stock_entity.description = description
+    new_stock_entity
   end  
 end
 
-test = StockEntity.new("Pie")
+test = StockEntity.create("Pie")
 
 puts test.description
