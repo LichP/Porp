@@ -15,15 +15,31 @@ def redis
 end
 
 class Porp
+  @@options = {
+    :ns_app        => 'porp',
+    :ns_site       => 'mysite',
+    :ns_deployment => 'dev'
+  }
 
-  # Namespace for all redis keys
-  NS_APP = 'porp'
-  NS_SITE = 'mysite'
-  NS_DEPLOYMENT = 'dev'
-  def self.ns
-    @@ns ||= "#{ns_app}:#{ns_site}:#{ns_deployment}"
+  def self.options
+    @@options
   end
 
+  def self.options=(options = {})
+    @@options.merge!(options)
+  end
+
+  # Namespace for all redis keys. By default compiles the string once only,
+  # but can be forced to rebuild if necessary
+  def self.ns(params = {:force_rebuild => false})
+    @@ns = compile_ns_string if params[:force_rebuild]
+    @@ns ||= compile_ns_string
+  end
+
+  def self.compile_ns_string
+    "#{options[:ns_app]}:#{options[:ns_site]}:#{options[:ns_deployment]}"
+  end
+ 
   class OrpModel
     attr_reader :id
 
@@ -39,8 +55,8 @@ class Porp
     # with this id so effectively creates the record  
     def self.new_id
       klass = self.name.downcase
-      id = redis.incr("#{ns}:#{klass}:uid")
-      redis.set("#{ns}:#{klass}:id:#{id.to_s}:created", 1)
+      id = redis.incr("#{Porp.ns}:#{klass}:uid")
+      redis.set("#{Porp.ns}:#{klass}:id:#{id.to_s}:created", 1)
       id
     end
 
@@ -52,7 +68,7 @@ class Porp
     # Check if a record exists
     def self.exists?(id)
       klass = self.name.downcase
-      redis.key?("#{ns}:#{klass}:id:#{id.to_s}:created")
+      redis.key?("#{Porp.ns}:#{klass}:id:#{id.to_s}:created")
     end
 
     # Create accessor methods for attributes stored as simple values in the db
@@ -65,11 +81,11 @@ class Porp
           end
       
           def _#{name}
-            redis.get("#{ns}:#{klass}:id:" + id.to_s + ":#{name}")
+            redis.get("#{Porp.ns}:#{klass}:id:" + id.to_s + ":#{name}")
           end
 
           def #{name}=(val)
-            redis.set("#{ns}:#{klass}:id:" + id.to_s + ":#{name}", val)
+            redis.set("#{Porp.ns}:#{klass}:id:" + id.to_s + ":#{name}", val)
           end
         EOCE
       end
@@ -88,18 +104,18 @@ class Porp
   
     def add_sale_entity(sale_id)
       if SaleEntity.exists?(sale_id)
-        redis.sadd("#{ns}:stockentity:id:#{id}:saleentities", sale_id)
+        redis.sadd("#{Porp.ns}:stockentity:id:#{id}:saleentities", sale_id)
       else
         false
       end
     end
 
     def rem_sale_entity(sale_id)
-      redis.srem("#{ns}:stockentity:id:#{id}:saleentities", sale_id) 
+      redis.srem("#{Porp.ns}:stockentity:id:#{id}:saleentities", sale_id) 
     end
 
     def sale_entities
-      redis.smembers("#{ns}:stockentity:id:#{id}:saleentities)")
+      redis.smembers("#{Porp.ns}:stockentity:id:#{id}:saleentities)")
     end
   end
 
@@ -115,18 +131,18 @@ class Porp
   
     def add_stock_entity(stock_id)
       if StockEntity.exists?(stock_id)
-        redis.sadd("#{ns}:saleentity:id:#{id}:stockentities", stock_id)
+        redis.sadd("#{Porp.ns}:saleentity:id:#{id}:stockentities", stock_id)
       else
         false
       end
     end
 
     def rem_stock_entity(stock_id)
-      redis.srem("#{ns}:saleentity:id:#{id}:stockentities", stock_id) 
+      redis.srem("#{Porp.ns}:saleentity:id:#{id}:stockentities", stock_id) 
     end
 
     def sale_entities
-      redis.smembers("#{ns}:saleentity:id:#{id}:stockentities)")
+      redis.smembers("#{Porp.ns}:saleentity:id:#{id}:stockentities)")
     end  
   end
 end
