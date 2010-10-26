@@ -1,5 +1,5 @@
 prepare do
-  
+  Porp.options = :ns_deployment => 'unittest'
 end
 
 setup do

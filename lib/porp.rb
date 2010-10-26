@@ -39,7 +39,20 @@ class Porp
   def self.compile_ns_string
     "#{options[:ns_app]}:#{options[:ns_site]}:#{options[:ns_deployment]}"
   end
- 
+
+  # List all keys in the current namespace
+  self.ns_keys
+    redis.get(/^#{ns}/)
+  end  
+
+  # Deletes all keys in the current namespace. This is intended primarily
+  # for unit tests. The namespace string is explicitly rebuilt to ensure
+  # any changes to the namespace options are picked up
+  def self.flush_current_namespace!
+    ns(:force_rebuild => :true)
+    ns_keys.each {|key| redis.del(key)}
+  end
+
   class OrpModel
     attr_reader :id
 
