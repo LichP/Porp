@@ -25,7 +25,7 @@ class Porp
     @@options
   end
 
-  def self.options=(options = {})
+  def self.set_options(options = {})
     @@options.merge!(options)
   end
 
@@ -41,16 +41,16 @@ class Porp
   end
 
   # List all keys in the current namespace
-  self.ns_keys
-    redis.get(/^#{ns}/)
+  def self.ns_keys
+    [redis.get(/^#{ns}/)].flatten
   end  
 
   # Deletes all keys in the current namespace. This is intended primarily
   # for unit tests. The namespace string is explicitly rebuilt to ensure
   # any changes to the namespace options are picked up
-  def self.flush_current_namespace!
+  def self.purge_current_namespace!
     ns(:force_rebuild => :true)
-    ns_keys.each {|key| redis.del(key)}
+    ns_keys.each { |key| redis.del(key) } unless ns_keys.nil?
   end
 
   class OrpModel

@@ -1,5 +1,4 @@
 require 'rubygems'
-
 require 'lib/porp'
 
 task :test do
