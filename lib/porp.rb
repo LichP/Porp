@@ -42,7 +42,7 @@ class Porp
 
   # List all keys in the current namespace
   def self.ns_keys
-    [redis.keys(/^#{ns}/)].flatten
+    [redis.keys("#{ns}*")].flatten
   end  
 
   # Deletes all keys in the current namespace. This is intended primarily

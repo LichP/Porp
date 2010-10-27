@@ -8,7 +8,7 @@ end
 
 test "new stock entity should match input data" do
   desc = "Stock entity creation test"
-  new_stke = Porp::StockEntity.new(desc)
+  new_stke = Porp::StockEntity.create(desc)
   assert 1 == new_stke.id
   assert desc == new_stke.description
 end
