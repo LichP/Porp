@@ -14,6 +14,8 @@ def redis
  $redis ||= Redis.new
 end
 
+# This is the top level class of Porp. It provides configuration and handles
+# the database key namespace.
 class Porp
   @@options = {
     :ns_app        => 'porp',
@@ -53,6 +55,7 @@ class Porp
     ns_keys.each { |key| redis.del(key) } unless ns_keys.nil?
   end
 
+  # Provides a generic Redis based data model.
   class OrpModel
     attr_reader :id
 
@@ -64,8 +67,8 @@ class Porp
       @id.to_s == other.id.to_s
     end
   
-    # Fetch the next available id for new record. This method sets a record key
-    # with this id so effectively creates the record  
+    # Fetches the next available id for a new record. This method sets a
+    # record key with this id so effectively creates the record  
     def self.new_id
       klass = self.name.downcase
       id = redis.incr("#{Porp.ns}:#{klass}:uid")
@@ -73,18 +76,18 @@ class Porp
       id
     end
 
-    # Find a record by id
+    # Finds a record by id
     def self.find_by_id(id)
       self.exists?(id) ? self.new(id) : nil
     end
 
-    # Check if a record exists
+    # Checks whether a record exists
     def self.exists?(id)
       klass = self.name.downcase
       redis.key?("#{Porp.ns}:#{klass}:id:#{id.to_s}:created")
     end
 
-    # Create accessor methods for attributes stored as simple values in the db
+    # Creates accessor methods for attributes stored as simple values in the db
     def self.property(*names)
       klass = self.name.downcase
       names.each do |name|
@@ -105,16 +108,20 @@ class Porp
     end
   end
 
+  # The StockEntity class represents physical stock. StockEntities are
+  # associated with one or more BuyingEntities, and one or more
+  # SellingEntities.
   class StockEntity < OrpModel
     property :description
   
-    # Create a new StockEntity record
+    # Creates a new StockEntity record
     def self.create(description)
       new_stock_entity = self.new(self.new_id)
       new_stock_entity.description = description
       new_stock_entity
     end
   
+    # Associates the StockEntity with a SaleEntity of id sale_id
     def add_sale_entity(sale_id)
       if SaleEntity.exists?(sale_id)
         redis.sadd("#{Porp.ns}:stockentity:id:#{id}:saleentities", sale_id)
@@ -123,19 +130,24 @@ class Porp
       end
     end
 
+    # Disassociates the StockEntity from a SaleEntity of id sale_id
     def rem_sale_entity(sale_id)
       redis.srem("#{Porp.ns}:stockentity:id:#{id}:saleentities", sale_id) 
     end
 
+    # Returns a list of all associated SaleEntity ids
     def sale_entities
       redis.smembers("#{Porp.ns}:stockentity:id:#{id}:saleentities)")
     end
   end
 
+  # The SaleEntity class represents goods on sale. A SaleEntity consists of
+  # some combination of StockEntities, usually one-to-one, but can be e.g.
+  # a multiple of one item, or a bundle of several.
   class SaleEntity < OrpModel
     property :description, :long_desc
   
-    # Create a new SaleEntity record
+    # Creates a new SaleEntity record
     def self.create(description)
       new_sale_entity = self.new(self.new_id)
       new_sale_entity.description = description
