@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Porp - The Prototype open Retail Platform
+# Porp - The Prototype Open Retail Platform
 #
 # Copyright (c) 2010 Phil Stewart
 #

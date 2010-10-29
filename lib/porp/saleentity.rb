@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Porp - The Prototype open Retail Platform
+# Porp - The Prototype Open Retail Platform
 #
 # Copyright (c) 2010 Phil Stewart
 #
@@ -21,10 +21,13 @@ class Porp
       new_sale_entity
     end
 
-    # Associates the sale entity with the supplied stock identity   
-    def add_stock_entity(stock_id)
+    # Associates the SaleEntity with the supplied StockEntity. When there is a
+    # SaleMovement for this SaleEntity, there will be a corresponding
+    # StockMovement for quantity units of StockEntity
+    def add_stock_entity(stock_id, quantity) # How to implement this?
       if StockEntity.exists?(stock_id)
         redis.sadd("#{Porp.ns}:saleentity:id:#{id}:stockentities", stock_id)
+        redis.hset("#{Porp.ns}:saleentity:id:#{id}:stkequantities", stock_id, quantity)
       else
         false
       end
@@ -33,6 +36,7 @@ class Porp
     # Disassociates the sale entity with the supplied stock identity
     def rem_stock_entity(stock_id)
       redis.srem("#{Porp.ns}:saleentity:id:#{id}:stockentities", stock_id) 
+      redis.hdel("#{Porp.ns}:saleentity:id:#{id}:stkequantities", stock_id)
     end
 
     # Returns a list of all stock entity ids associated with the sale entity
