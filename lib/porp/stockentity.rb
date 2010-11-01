@@ -8,9 +8,11 @@
 
 class Porp
 
-  # The StockEntity class represents physical stock. StockEntities are
-  # associated with one or more BuyingEntities, and one or more
-  # SellingEntities.
+=begin
+The StockEntity class represents physical stock. StockEntities are
+associated with one or more BuyingEntities, and one or more
+SellingEntities. Quantities of stock are represented by StockHoldings.
+=end
   class StockEntity < OrpModel
     property :description
   
@@ -38,6 +40,24 @@ class Porp
     # Returns a list of all associated SaleEntity ids
     def sale_entities
       redis.smembers("#{Porp.ns}:stockentity:id:#{id}:saleentities)")
+    end
+    
+    # Associates the StockEntity with a StockHolding
+    def add_stock_holding(stkh_id)
+      if StockHolding.exists?(stkh_id)
+        stkh = StockHolding.new(stkh_id)
+        # Don't associate with other StockEntities' StockHoldings
+        raise if stkh.stock_entity != id
+        redis.sadd("#{Porp.ns}:stockholding:id:#{id}:stockholdings", stkh_id)
+      else
+        false
+      end
+    end
+    
+    # Archive an end-of-life StockHolding
+    def archive_stock_holding(stkh_id)
+      redis.smove("#{Porp.ns}:stockholding:id:#{id}:stockholdings",
+                  "#{Porp.ns}:stockholding:id:#{id}:archivestockholdings", stkh_id)
     end
   end
 end
