@@ -22,19 +22,27 @@ the original StockHoldings to a new StockHolding, and can likewise be split
 in similar fashion.
 =end
   class StockHolding < OrpModel
-    property :stock_entity
+    property :stock_entity_id
+    property :quantity
+    property :unit_cost
   
-    # Creates a new StockHolding record linked to StockEntity with id stke_id
-    def self.create(stke_id)
-      if StockEntity.exists?(stke_id)
-        new_stock_holding = self.new(self.new_id)
-        new_stock_holding.stock_entity = stke_id
-        stock_entity = StockEntity.new(stke_id)
-        stock_entity.add_stock_holding(new_stock_holding.id)
-        new_stock_holding
-      else
-        false
-      end
+    # Creates a new StockHolding record linked to StockEntity stke
+    def self.create(stke, quantity, unit_cost)
+      new_stkh = self.new(self.new_id)
+      new_stkh.stock_entity_id = stke.id
+      new_stkh.quantity = quantity
+      new_stkh.unit_cost = unit_cost
+      new_stkh
+    end
+    
+    def stock_entity
+      Porp::StockEntity.new(stock_entity_id)
+    end
+    
+    # Returns whether the StockHolding is end of life. True when quantity is
+    # zero (and StockMovements > 0?)
+    def eol?
+      quantity == 0
     end
   end
 end

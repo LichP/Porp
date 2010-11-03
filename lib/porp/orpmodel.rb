@@ -19,13 +19,17 @@ class Porp
     def ==(other)
       @id.to_s == other.id.to_s
     end
+    
+    # Formats the class name of the object for use in the redis keyspace
+    def self.rklass
+      self.name.downcase.match(/(\w+)$/)[0]
+    end
   
     # Fetches the next available id for a new record. This method sets a
     # record key with this id so effectively creates the record  
     def self.new_id
-      klass = self.name.downcase
-      id = redis.incr("#{Porp.ns}:#{klass}:uid")
-      redis.set("#{Porp.ns}:#{klass}:id:#{id.to_s}:created", 1)
+      id = redis.incr("#{Porp.ns}:#{rklass}:uid")
+      redis.set("#{Porp.ns}:#{rklass}:id:#{id.to_s}:created", 1)
       id
     end
 
@@ -36,13 +40,11 @@ class Porp
 
     # Checks whether a record exists
     def self.exists?(id)
-      klass = self.name.downcase
-      redis.key?("#{Porp.ns}:#{klass}:id:#{id.to_s}:created")
+      redis.key?("#{Porp.ns}:#{rklass}:id:#{id.to_s}:created")
     end
 
     # Creates accessor methods for attributes stored as simple values in the db
     def self.property(*names)
-      klass = self.name.downcase
       names.each do |name|
         self.class_eval <<-EOCE
           def #{name}
@@ -50,11 +52,11 @@ class Porp
           end
       
           def _#{name}
-            redis.get("#{Porp.ns}:#{klass}:id:" + id.to_s + ":#{name}")
+            redis.get("#{Porp.ns}:#{rklass}:id:" + id.to_s + ":#{name}")
           end
 
           def #{name}=(val)
-            redis.set("#{Porp.ns}:#{klass}:id:" + id.to_s + ":#{name}", val)
+            redis.set("#{Porp.ns}:#{rklass}:id:" + id.to_s + ":#{name}", val)
           end
         EOCE
       end

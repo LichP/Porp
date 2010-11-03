@@ -58,4 +58,5 @@ end
 
 require 'porp/orpmodel'
 require 'porp/stockentity'
+require 'porp/stockholding'
 require 'porp/saleentity'

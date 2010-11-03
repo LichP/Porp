@@ -43,21 +43,15 @@ SellingEntities. Quantities of stock are represented by StockHoldings.
     end
     
     # Associates the StockEntity with a StockHolding
-    def add_stock_holding(stkh_id)
-      if StockHolding.exists?(stkh_id)
-        stkh = StockHolding.new(stkh_id)
-        # Don't associate with other StockEntities' StockHoldings
-        raise if stkh.stock_entity != id
-        redis.sadd("#{Porp.ns}:stockholding:id:#{id}:stockholdings", stkh_id)
-      else
-        false
-      end
+    def add_new_stock_holding(quantity, cost)
+      stkh = Porp::StockHolding.create(self, quantity, cost)
+      redis.sadd("#{Porp.ns}:stockholding:id:#{id}:stockholdings", stkh.id)
     end
     
     # Archive an end-of-life StockHolding
-    def archive_stock_holding(stkh_id)
+    def archive_stock_holding(stkh)
       redis.smove("#{Porp.ns}:stockholding:id:#{id}:stockholdings",
-                  "#{Porp.ns}:stockholding:id:#{id}:archivestockholdings", stkh_id)
+                  "#{Porp.ns}:stockholding:id:#{id}:archivestockholdings", stkh.id)
     end
   end
 end
