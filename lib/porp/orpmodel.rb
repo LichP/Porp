@@ -40,7 +40,7 @@ class Porp
 
     # Checks whether a record exists
     def self.exists?(id)
-      redis.key?("#{Porp.ns}:#{rklass}:id:#{id.to_s}:created")
+      redis.exists("#{Porp.ns}:#{rklass}:id:#{id.to_s}:created")
     end
 
     # Creates accessor methods for attributes stored as simple values in the db
