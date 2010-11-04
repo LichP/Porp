@@ -30,3 +30,23 @@ test "exists? returns false when object data doesn't exist in redis" do
   assert !Porp::OrpModel.exists?(23)
 end
 
+test "property method creates accessor methods" do
+  class PropertyTest < Porp::OrpModel
+    property :testproperty
+  end
+  id = PropertyTest.new_id
+  object = PropertyTest.new(id)
+  object.testproperty = "Foo"
+  assert "Foo" == redis.get("#{Porp.ns}:propertytest:id:1:testproperty")
+  assert "Foo" == object.testproperty
+end
+
+test "find_by_id returns object with matching id when id exists" do
+  id = Porp::OrpModel.new_id
+  object = Porp::OrpModel.find_by_id(id)
+  assert id == object.id
+end
+
+test "find_by_id returns nil when non-extant id passed" do
+  assert nil == Porp::OrpModel.find_by_id(23)
+end
