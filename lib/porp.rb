@@ -8,7 +8,11 @@
 
 require 'rubygems'
 require 'ohm'
+require 'ohm/contrib'
 
+require 'porp/error'
+require 'porp/movementtarget'
+require 'porp/stocksourcedest'
 require 'porp/stockentity'
 require 'porp/stockholding'
 require 'porp/saleentity'

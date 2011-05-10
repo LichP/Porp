@@ -24,8 +24,8 @@ be split in similar fashion.
 =end
   class StockHolding < Ohm::Model
     reference :stock_entity, StockEntity
-    attribute :quantity
-    attribute :unit_cost
+    list :entries, StockHoldingEntry
+
     collection :stock_issues, StockMovement, :source_stkh
     collection :stock_receipts, StockMovement, :dest_stkh
 
@@ -34,19 +34,25 @@ be split in similar fashion.
       StockMovement.find(:source_stkh_id => self.id, :dest_stkh_id => self.id)
     end
 
-    # Creates a new StockHolding record linked to StockEntity stke
-#    def self.create(stke, quantity, unit_cost)
-#      new_stkh = self.new(self.new_id)
-#      new_stkh.stock_entity_id = stke.id
-#      new_stkh.quantity = quantity
-#      new_stkh.unit_cost = unit_cost
-#      new_stkh
-#    end
+  end
+  
+  class StockHoldingEntry < Ohm::Model
+    reference :stock_holding, StockHolding
+    attribute :ctime
+    attribute :quantity
+    attribute :unit_cost
     
+    def create(*args)
+      super(*args)
+      self.ctime = Time.now.to_f
+      self.quantity ||= 0
+      self.unit_cost ||= 0
+    end
+
     # Returns whether the StockHolding is end of life. True when quantity is
     # zero (and StockMovements > 0?)
     def eol?
-      quantity == 0
+      self.quantity == 0
     end
   end
 #end
