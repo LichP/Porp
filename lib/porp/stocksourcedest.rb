@@ -30,7 +30,6 @@ behaviour
       
       # Lock while we update the attributes
       mutex do
-        binding.pry
         self.net_stock_qty = Integer(self.net_stock_qty) - Integer(movement.source_qty)
         self.net_stock_value = Rational(self.net_stock_value) - Integer(movement.source_qty) * Rational(movement.source_unit_cost)
         self.save
@@ -64,6 +63,7 @@ behaviour
       # to ensure conservation of value. The destination unit cost can be
       # calculated by dividing out the dest qty
       mutex do
+        binding.pry
         self.net_stock_qty = Integer(self.net_stock_qty) + Integer(movement.dest_qty)
         self.net_stock_value = Rational(self.net_stock_value) + Integer(movement.source_qty) * Rational(movement.source_unit_cost)
         self.save
@@ -77,33 +77,25 @@ behaviour
   # Misc target uses the default net quantity and net value scheme. It maintains
   # a single instance primarily intended for testing.  
   class MiscTarget < StockSourceDest
-    @@misc_singleton = nil
+    @@misc_singleton = Hash.new
   
     def self.acquire
-      @@misc_singleton ||= self.new(id: 1)
-      @@misc_singleton.save
+      @@misc_singleton[self] ||= self.create
     end
     
     def self.reinit(*args)
-      @@misc_singleton ||= self.new(id: 1)
-      @@misc_singleton.update(*args)
+      @@misc_singleton[self] = self.create(*args)
+    end
+
+    # Ensure only one instance in the database by overriding id creation and
+    # only ever allowing the first id
+    def initialize_id
+      @id = "1"
     end
   end
   
   # Null target literally does nothing. Intended for testing only.
-  class NullTarget < StockSourceDest
-    @@misc_singleton = nil
-  
-    def self.acquire
-      @@null_singleton ||= self.new(id: 1)
-      @@null_singleton.save
-    end
-    
-    def self.reinit(*args)
-      @@null_singleton ||= self.new(id: 1)
-      @@null_singleton.update(*args)
-    end
-
+  class NullTarget < MiscTarget
     def issue(movement_id)
       true
     end
@@ -117,4 +109,3 @@ behaviour
     end
   end
 #end
-  
