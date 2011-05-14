@@ -14,15 +14,16 @@ quantities and cost value from one MovementTarget to another.
 =end
   class StockMovement < Ohm::Model
     include Ohm::Looseref
+    include Ohm::Struct
+    include Ohm::Locking
   
     looseref  :source_target, MovementTarget
     reference :source_stke, StockEntity
-    attribute :source_qty
-    attribute :source_unit_cost
+    struct    :source_amount, Amount
 
     looseref  :dest_target, MovementTarget
     reference :dest_stke, StockEntity
-    attribute :dest_qty
+    struct    :dest_amount, Amount
     
     attribute :creation_time
     attribute :issue_committed
@@ -43,35 +44,37 @@ quantities and cost value from one MovementTarget to another.
     # Create a new movement and commit it. If the commit fails, the uncommitted
     # movement remains in the database.
     def self.move_no_cleanup(*args)
-      movement = create(*args)
+#      movement = create(*args)
+      movement = new(*args)
       movement.move_no_cleanup()
-      movement
     end
     
-    # Create the StockMovement, and set default values where appropriate
-    def create(*args)
-      super(*args)
-      creation_time = Time.now.to_f
-      issue_committed = false
-      issue_time = nil
-      rcpt_committed = false
-      rcpt_time = nil
-      completed = false
-      completion_time = nil
+    # Set defaults for attributes
+    def initialize(attrs = {})
+      super(attrs)
+      self.creation_time ||= Time.now.to_f
+      self.issue_committed ||= false
+      self.issue_time ||= nil
+      self.rcpt_committed ||= false
+      self.rcpt_time ||= nil
+      self.completed ||= false
+      self.completion_time ||= nil
       
-      # Source quantity and unit cost default to zero if not supplied
-      # (may want to add warning here in future)
-      source_qty ||= 0
-      unit_cost ||= 0
+      # Source quantity and unit cost default to one and zero if not supplied. It is
+      # expected that unit cost will be determined by the source
+      # (may want to raise here in future if zero qty passed in)
+      self.source_amount ||= Amount.new(1, 0)
       
       # Destination stock entity is assumed to be the same as the source
       # stock entity if not supplied
-      dest_stke_id ||= source_stke_id
+      self.dest_stke_id ||= self.source_stke_id
       
       # Destination quantity is assumed to be the same as the source
-      # quantity if not supplied
-      dest_qty ||= source_qty
-      save
+      # quantity if not supplied.
+      # Destination unit cost is always calculated such that
+      # source_amount.value == dest_amount.value
+      self.dest_amount ||= Amount.new(self.source_amount.qty, 0)      
+      self.dest_amount.ucost = Rational(source_amount.value) / Integer(dest_amount.qty)
     end
     
     # Validation. A movement must specify the following:
@@ -80,7 +83,9 @@ quantities and cost value from one MovementTarget to another.
     #  * Source stock entity
     def validate
       assert_present :source_target_id
+      assert_present :source_target_klass
       assert_present :dest_target_id
+      assert_present :dest_target_klass
       assert_present :source_stke_id
     end
 
@@ -89,8 +94,9 @@ quantities and cost value from one MovementTarget to another.
     def move(*args)
       begin
         move_no_cleanup(*args)
-      rescue MovementAlreadyComplete
+      rescue Orp::MovementAlreadyComplete
         warn "Attempted to complete already completed movement"
+        nil
       rescue
         delete
         raise
@@ -102,18 +108,26 @@ quantities and cost value from one MovementTarget to another.
     def move_no_cleanup(*args)
       # Abort if the movement is already complete
       raise Orp::MovementAlreadyComplete if completed
-      
-      mutex do
-        self.update(*args) if args.length > 0
-        raise Orp::MovementValidationError if !self.valid?
 
+      raise Orp::MovementValidationError if !self.valid?
+      self.update(*args) if args.length > 0
+
+      # This mutex prevents against two attempts to complete the same move
+      # simultaneously. The movement remains editable throughout.
+      #
+      # BUT: Do we even need this? If the movement is only created just in time
+      # then nothing else is going to have that instance 
+#      mutex(0.01) do
 	# Commit the issue
-	self.issue_committed = self.source_target.issue(id) ? true : false
+	self.issue_committed = self.source_target.issue(self) ? true : false
 	
 	# Commit the receipt if the issue succeeded
 	if self.issue_committed
 	  self.issue_time = Time.now.to_f
-	  self.rcpt_committed = self.dest_target.receive(id) ? true : false
+	  # Recalculate the destination unit cost in case the source
+	  # overrided the source unit cost
+	  self.dest_amount.ucost = Rational(self.source_amount.value / self.dest_amount.qty)
+	  self.rcpt_committed = self.dest_target.receive(self) ? true : false
 	else
 	  raise Orp::MovementIssueError
 	end
@@ -122,7 +136,7 @@ quantities and cost value from one MovementTarget to another.
 	if self.rcpt_committed
 	  self.rcpt_time = Time.now.to_f
 	else
-	  self.issue_committed = self.source_target.reverse_issue(id) ? false : true
+	  self.issue_committed = self.source_target.reverse_issue(self) ? false : true
 	  if !self.issue_committed
 	    # If issue_committed is still true, then the issue reversal also
 	    # failed!
@@ -136,9 +150,8 @@ quantities and cost value from one MovementTarget to another.
         # Movement is now done
         self.completed = true
         self.completion_time = Time.now.to_f
-        self.save
-      end
-      return true
+#      end
+      self.save
     end
   end
 #end

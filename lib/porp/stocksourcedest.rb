@@ -14,63 +14,58 @@ destroy stock. Class implements a default source/destination issue and receipt
 behaviour
 =end
   class StockSourceDest < MovementTarget
+    include Ohm::Locking
+
     attribute :net_stock_qty
     attribute :net_stock_value    
 
     # Set defaults for attributes if not supplied
     def initialize(attrs = {})
       super(attrs)
-      net_stock_qty ||= 0
-      net_stock_value ||= 0
+      self.net_stock_qty ||= 0
+      self.net_stock_value ||= 0
     end
     
     # Issue stock from this target
-    def issue(movement_id)
-      movement = StockMovement[movement_id]
-      
+    def issue(movement)
       # Lock while we update the attributes
-      mutex do
-        self.net_stock_qty = Integer(self.net_stock_qty) - Integer(movement.source_qty)
-        self.net_stock_value = Rational(self.net_stock_value) - Integer(movement.source_qty) * Rational(movement.source_unit_cost)
-        self.save
+      mutex(0.01) do
+        self.net_stock_qty = Integer(self.net_stock_qty) - Integer(movement.source_amount.qty)
+        self.net_stock_value = Rational(self.net_stock_value) - Rational(movement.source_amount.value)
       end
+      self.save
 
       # Return the quantity issued
-      movement.source_qty
+      movement.source_amount.qty
     end
     
     # Reverse an issue
-    def reverse_issue(movement_id)
-      movement = StockMovement[movement_id]
-      
+    def reverse_issue(movement)
       # Lock while we update the attributes
-      mutex do
-        self.net_stock_qty = Integer(self.net_stock_qty) + Integer(movement.source_qty)
-        self.net_stock_value = Rational(self.net_stock_value) + Integer(movement.source_qty) * Rational(movement.source_unit_cost)
-        self.save
+      mutex(0.01) do
+        self.net_stock_qty = Integer(self.net_stock_qty) + Integer(movement.source_amount.qty)
+        self.net_stock_value = Rational(self.net_stock_value) + Rational(movement.source_amount.value)
       end
+      self.save
 
       # Return the quantity issued (negated as we're reversing)
-      -movement.source_qty
+      -movement.source_amount.qty
     end
 
     # Receive stock to this target
-    def receive(movement_id)
-      movement = StockMovement[movement_id]
-      
+    def receive(movement)
       # Lock while we update the attributes
       # The stock value change is calculated on source qty and source unit
       # to ensure conservation of value. The destination unit cost can be
       # calculated by dividing out the dest qty
-      mutex do
-        binding.pry
-        self.net_stock_qty = Integer(self.net_stock_qty) + Integer(movement.dest_qty)
-        self.net_stock_value = Rational(self.net_stock_value) + Integer(movement.source_qty) * Rational(movement.source_unit_cost)
-        self.save
+      mutex(0.01) do
+        self.net_stock_qty = Integer(self.net_stock_qty) + Integer(movement.dest_amount.qty)
+        self.net_stock_value = Rational(self.net_stock_value) + Rational(movement.source_amount.value)
       end
+      self.save
       
       # Return the quantity received
-      movement.dest_qty
+      movement.dest_amount.qty
     end    
   end
 
@@ -96,15 +91,15 @@ behaviour
   
   # Null target literally does nothing. Intended for testing only.
   class NullTarget < MiscTarget
-    def issue(movement_id)
+    def issue(movement)
       true
     end
 
-    def reverse_issue(movement_id)
+    def reverse_issue(movement)
       true
     end
 
-    def receive(movement_id)
+    def receive(movement)
       true
     end
   end

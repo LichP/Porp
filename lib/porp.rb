@@ -7,10 +7,13 @@
 # License: MIT (see LICENSE file)
 
 require 'rubygems'
+require 'hiredis'
+require 'redis/connection/hiredis'
 require 'ohm'
 require 'ohm/contrib'
 
 require 'porp/error'
+require 'porp/structs'
 require 'porp/movementtarget'
 require 'porp/stocksourcedest'
 require 'porp/stockentity'

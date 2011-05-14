@@ -22,17 +22,17 @@ represents physical stock holdings.
     end
 
     # Stub for issue method: needs to be implemented by subclasses
-    def issue(movement_id)
+    def issue(movement)
       false
     end
 
     # Stub for reverse_issue method: needs to be implemented by subclasses
-    def reverse_issue(movement_id)
+    def reverse_issue(movement)
       false
     end
 
     # Stub for receive method: needs to be implemented by subclasses
-    def receive(movement_id)
+    def receive(movement)
       false
     end
 

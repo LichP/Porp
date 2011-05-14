@@ -1,19 +1,40 @@
 #!/usr/bin/env ruby1.9.1
 
-require 'pry'
+#require 'pry'
+require 'ruby-prof'
 require 'fileutils'
 
 $: << FileUtils.pwd.sub(/irb$/, 'lib')
 
 require 'porp'
 
-# Create a stock entity
-test_stke = StockEntity.create(description: "Test stock entity")
+#test_stke_array = []
+#101.upto(900) do |i|
+#  StockEntity.find(description: "Test stock entity #{i}").first || StockEntity.create(description: "Test stock entity #{i}")
+#end
 
-# Move the stock entity from the misc target to the misc target
-source_target = MiscTarget.acquire
-dest_target = NullTarget.acquire
-binding.pry
-test_stke.move(source_target, dest_target, 1, 2.00)
+#holding_target = test_stke.holding(:test_holding)
+#holding_target2 = test_stke.holding(:test_holding2)
+#misc_target = MiscTarget.acquire
+null_target = NullTarget.acquire
 
-binding.pry
+#binding.pry
+
+StockEntity.all.each do |test_stke|
+#  puts test_stke.description
+  test_stke.move(null_target, test_stke.holding(:test_holding), 10, 2.00)
+end
+
+RubyProf.start
+StockEntity.all.each do |test_stke|
+#  puts test_stke.description
+  test_stke.move(test_stke.holding(:test_holding), test_stke.holding(:test_holding2), 10, 2.00)
+end
+result = RubyProf.stop
+
+#binding.pry
+
+# Print a flat profile to text
+printer = RubyProf::GraphPrinter.new(result)
+printer.print(STDOUT, {})
+    

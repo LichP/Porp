@@ -14,20 +14,25 @@ associated with one or more BuyingEntities, and one or more
 SellingEntities. Quantities of stock are represented by StockHoldings.
 =end
   class StockEntity < Ohm::Model
-    attribute :description
+    attribute  :description
+    index      :description
     #set :sale_entities, SaleEntity
-    collection :stock_holdings, StockHolding
-    list :stock_movements, StockMovement
+    collection :stock_holdings, StockHolding, :stock_entity
+    list       :stock_movements, StockMovement
+    
+    def holding(name)
+      stock_holdings.find(:name => name).first || StockHolding.create(name: name, stock_entity: self)
+    end
   
-    def move(source_target, dest_target, qty, unit_cost)
-      stock_movements << StockMovement.move_no_cleanup(source_target:    source_target,
-                                                       source_stke_id:   id,
-                                                       source_qty:       Integer(qty),
-                                                       source_unit_cost: Rational(unit_cost),
-                                                       dest_target:      dest_target,
-                                                       dest_stke_id:     id)
+    def move(source_target, dest_target, qty, ucost)
+      movement = StockMovement.move_no_cleanup(source_target:    source_target,
+                                               source_stke_id:   id,
+                                               source_amount:    Amount.new(qty, ucost),
+                                               dest_target:      dest_target,
+                                               dest_stke_id:     id)
       # Return the completion status of the movement
-      stock_movements[-1].completed
+      stock_movements << movement
+      movement.completed
     end
   end
 #end
