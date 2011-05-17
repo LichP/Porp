@@ -103,8 +103,8 @@ be split in similar fashion.
     def initialize(attrs = {})
       attrs.delete(:ctime)  # ctime can never be overruled)
       super(attrs)
+#      binding.pry
       self.ctime ||= Time.now.to_f
-      self.mtime ||= Time.now.to_f
       self.amount_in ||= Amount.new(0, 0)
       self.amount_out ||= Amount.new(0, self.amount_in.ucost)
     end
