@@ -4,7 +4,7 @@ require 'benchmark'
 
 require 'fileutils'
 
-$: << FileUtils.pwd.sub(/irb$/, 'lib')
+$: << FileUtils.pwd.sub(/benchmarks$/, 'lib')
 
 require 'porp'
 
@@ -22,9 +22,9 @@ class Ohm::Model
   end
 
   def delete_from_indices_pipelined
-    indices = key[:_indices].smembers
+    indices_key = key[:_indices].smembers
     db.pipelined do
-      indices.each do |index|
+      indices_key.each do |index|
         db.srem(index, id)
       end
     end

@@ -53,13 +53,7 @@ quantities and cost value from one MovementTarget to another.
     def initialize(attrs = {})
       super(attrs)
       self.creation_time ||= Time.now.to_f
-      self.issue_committed ||= false
-      self.issue_time ||= nil
-      self.rcpt_committed ||= false
-      self.rcpt_time ||= nil
-      self.completed ||= false
-      self.completion_time ||= nil
-      
+
       # Source quantity and unit cost default to one and zero if not supplied. It is
       # expected that unit cost will be determined by the source
       # (may want to raise here in future if zero qty passed in)

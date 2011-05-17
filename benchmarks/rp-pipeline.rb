@@ -4,7 +4,7 @@ require 'ruby-prof'
 
 require 'fileutils'
 
-$: << FileUtils.pwd.sub(/irb$/, 'lib')
+$: << FileUtils.pwd.sub(/benchmarks$/, 'lib')
 
 require 'porp'
 
