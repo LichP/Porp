@@ -23,8 +23,10 @@ the original StockHoldingEntries to a new StockHoldingEntry, and can likewise
 be split in similar fashion.
 =end
   class StockHolding < MovementTarget
-    reference :stock_entity, StockEntity
-    list      :entries, StockHoldingEntry
+    reference :entity,          StockEntity
+    reference :holder,          StockHolder
+    reference :status,          StockStatus
+    list      :entries,         StockHoldingEntry
     list      :defunct_entries, StockHoldingEntry
     attribute :name
     index     :name

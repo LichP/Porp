@@ -17,11 +17,15 @@ SellingEntities. Quantities of stock are represented by StockHoldings.
     attribute  :description
     index      :description
     #set :sale_entities, SaleEntity
-    collection :stock_holdings, StockHolding, :stock_entity
+    collection :stock_holdings, StockHolding, :entity
     list       :stock_movements, StockMovement
+
+    def create_holdings
+      
+    end
     
     def holding(name)
-      stock_holdings.find(:name => name).first || StockHolding.create(name: name, stock_entity: self)
+      stock_holdings.find(:name => name).first || StockHolding.create(name: name, entity: self)
     end
   
     def move(source_target, dest_target, qty, ucost)
