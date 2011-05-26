@@ -13,7 +13,8 @@ The StockEntity class represents physical stock. StockEntities are
 associated with one or more BuyingEntities, and one or more
 SellingEntities. Quantities of stock are represented by StockHoldings.
 =end
-  class StockEntity < Ohm::Model
+class Stock
+  class Entity < Ohm::Model
     attribute  :description
     index      :description
     #set :sale_entities, SaleEntity
@@ -39,5 +40,6 @@ SellingEntities. Quantities of stock are represented by StockHoldings.
       movement.completed
     end
   end
+end
 #end
   

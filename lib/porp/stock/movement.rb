@@ -12,7 +12,8 @@
 The StockMovement class represents movements of physical stock by moving
 quantities and cost value from one MovementTarget to another.
 =end
-  class StockMovement < Ohm::Model
+class Stock
+  class Movement < Ohm::Model
     include Ohm::Looseref
     include Ohm::Struct
     include Ohm::Locking
@@ -148,5 +149,6 @@ quantities and cost value from one MovementTarget to another.
       self.save
     end
   end
+end
 #end
   

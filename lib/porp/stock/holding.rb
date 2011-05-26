@@ -22,7 +22,8 @@ StockHoldingEntries can be effectively merged by performing StockMovements from
 the original StockHoldingEntries to a new StockHoldingEntry, and can likewise
 be split in similar fashion.
 =end
-  class StockHolding < MovementTarget
+class Stock
+  class Holding < MovementTarget
     reference :entity,          StockEntity
     reference :holder,          StockHolder
     reference :status,          StockStatus
@@ -128,5 +129,6 @@ be split in similar fashion.
       self.mtime = Time.now.to_f
     end
   end
+end
 #end
   

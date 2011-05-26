@@ -14,6 +14,7 @@ stock movement. It is subclassed by StockSourceDest, which represents
 targets which create and destroy stock, and by StockHolding, which
 represents physical stock holdings.
 =end
+class Stock
   class MovementTarget < Ohm::Model
   
     # If inherited ensure the child gets attributes defined in higher classes
@@ -42,5 +43,6 @@ represents physical stock holdings.
       @_attributes.clear
     end
   end
+end
 #end
   

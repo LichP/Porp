@@ -33,8 +33,9 @@ It therefore falls to the StockDirector class to take the model specified by
 user configuration and apply it on a product group, stock entity, and default
 basis as appropriate.
 =end
-  class StockDirector
-    
+class Stock
+  class Director
   end
+end
 #end
   

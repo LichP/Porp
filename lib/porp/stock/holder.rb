@@ -12,10 +12,12 @@
 The StockHolder class represents holders of stock, such as outlets, stock rooms,
 warehouses, etc.
 =end
-  class StockHolder < Ohm::Model
+class Stock
+  class Holder < Ohm::Model
     attribute  :description
     index      :description
     collection :stock_holdings, StockHolding, :holder
   end
+end
 #end
   

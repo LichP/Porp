@@ -13,7 +13,8 @@ The StockSourceDest class represents movement targets which create or
 destroy stock. Class implements a default source/destination issue and receipt
 behaviour
 =end
-  class StockSourceDest < MovementTarget
+class Stock
+  class SourceDest < MovementTarget
     include Ohm::Locking
 
     attribute :net_stock_qty
@@ -71,7 +72,7 @@ behaviour
 
   # Misc target uses the default net quantity and net value scheme. It maintains
   # a single instance primarily intended for testing.  
-  class MiscTarget < StockSourceDest
+  class MiscTarget < SourceDest
     @@misc_singleton = Hash.new
   
     def self.acquire
@@ -103,4 +104,5 @@ behaviour
       true
     end
   end
+end
 #end

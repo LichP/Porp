@@ -12,10 +12,12 @@
 The StockStatus class represents different states can hold, such as 'in stock',
 'on order', etc
 =end
-  class StockStatus < Ohm::Model
+class Stock
+  class Status < Ohm::Model
     attribute  :description
     index      :description
     collection :stock_holdings, StockHolding, :status
   end
+end
 #end
   
