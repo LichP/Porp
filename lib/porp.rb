@@ -2,7 +2,7 @@
 #
 # Porp - The Prototype Open Retail Platform
 #
-# Copyright (c) 2010 Phil Stewart
+# Copyright (c) 2010-2011 Phil Stewart
 #
 # License: MIT (see LICENSE file)
 
@@ -12,7 +12,7 @@ require 'redis/connection/hiredis'
 require 'ohm'
 require 'ohm/contrib'
 
-require 'porp/error'
-require 'porp/structs'
-require 'porp/stock'
-require 'porp/saleentity'
+require File.join(File.dirname(__FILE__), 'porp', 'error')
+require File.join(File.dirname(__FILE__), 'porp', 'structs')
+require File.join(File.dirname(__FILE__), 'porp', 'stock')
+require File.join(File.dirname(__FILE__), 'porp', 'saleentity')

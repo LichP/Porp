@@ -9,9 +9,8 @@
 #module Porp
 
 =begin
-The StockEntity class represents physical stock. StockEntities are
-associated with one or more BuyingEntities, and one or more
-SellingEntities. Quantities of stock are represented by StockHoldings.
+The StockEntity class represents physical stock. Quantities of StockEntities
+are represented by StockHoldings.
 =end
 class Stock
   class Entity < Ohm::Model

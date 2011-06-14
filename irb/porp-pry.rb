@@ -4,9 +4,9 @@ require 'pry'
 #require 'ruby-prof'
 require 'fileutils'
 
-$: << FileUtils.pwd.sub(/irb$/, 'lib')
+#$: << FileUtils.pwd.sub(/irb$/, 'lib')
 
-require 'porp'
+require File.join(File.dirname(__FILE__), '..', 'lib', 'porp')
 
 $read_local_uber_counter = 0
 
