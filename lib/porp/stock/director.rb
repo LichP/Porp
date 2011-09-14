@@ -35,6 +35,19 @@ basis as appropriate.
 =end
 class Stock
   class Director
+
+    def self.ensure_holders(holders)
+      raise Orp::NoHoldersSpecified if holders.nil?
+    end
+
+    def self.ensure_statuses(statuses)
+      raise Orp::NoStatusesSpecified if holders.nil?
+    end
+
+    # Build a stock entity and dependencies from passed options
+    def self.build_from_options(description, opts)
+            
+    end
   end
 end
 #end

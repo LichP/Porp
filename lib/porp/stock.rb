@@ -23,6 +23,7 @@ The Stock class provides the high level interface for interacting with stock.
   class Stock
     attr_reader :entity
   
+    # Return a Stock instance for the stock entity identified by id
     def self.[](id)
       entity = Entity[id]
       if !entity.nil?
@@ -30,6 +31,15 @@ The Stock class provides the high level interface for interacting with stock.
       else
         nil
       end
+    end
+
+    # Creates a new item of stock, including the entity and all holdings,
+    # ensuring all dependencies are met i.e. all targets, holders, and statuses
+    def self.create(description = "", opts = {})
+      raise Orp::NoHoldersSpecified if opts[:holders].nil?
+      raise Orp::NoStatusesSpecified if opts[:statuses].nil?
+
+      self.new(Director.build_from_options(description, opts)
     end
 
     def initialize(entity = nil)

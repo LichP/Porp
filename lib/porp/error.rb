@@ -15,6 +15,11 @@ Error exception classes are defined here
   # All porp errors are of type Orp::Error
   class Error < RuntimeError; end
 
+  # Stock creation errors
+  class StockCreationError < Error; end
+  class NoHoldersSpecified  < StockCreationError; end
+  class NoStatusesSpecified < StockCreationError; end
+
   # Movement errors  
   class MovementError < Error; end
   class MovementValidationError   < MovementError; end

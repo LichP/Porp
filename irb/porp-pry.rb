@@ -66,10 +66,16 @@ class Ohm::Model
   end
 end
 
+stock_options = {
+ :holders  => [:shop, :newsagent, :ho],
+ :statuses => [:futurestock, :instock, :reserved, :archived]
+}
+
 #test_stke_array = []
-#101.upto(900) do |i|
-#  StockEntity.find(description: "Test stock entity #{i}").first || StockEntity.create(description: "Test stock entity #{i}")
-#end
+1.upto(100) do |i|
+  # StockEntity.find(description: "Test stock entity #{i}").first ||
+  Stock.create("Test stock entity #{i}", stock_options)
+end
 
 #holding_target = test_stke.holding(:test_holding)
 #holding_target2 = test_stke.holding(:test_holding2)
