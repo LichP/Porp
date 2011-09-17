@@ -6,8 +6,7 @@
 #
 # License: MIT (see LICENSE file)
 
-#module Porp
-
+class Stock
 =begin
 The StockDirector class mediates the complex interactions between the various
 stock related classes, in particular the StockHolding class, which represents
@@ -33,22 +32,50 @@ It therefore falls to the StockDirector class to take the model specified by
 user configuration and apply it on a product group, stock entity, and default
 basis as appropriate.
 =end
-class Stock
   class Director
 
-    def self.ensure_holders(holders)
-      raise Orp::NoHoldersSpecified if holders.nil?
+    def self.ensure_holders(holder_names)
+      raise Orp::NoHoldersSpecified if holder_names.nil?
+      Holder.ensure_extant(holder_names)
     end
 
-    def self.ensure_statuses(statuses)
-      raise Orp::NoStatusesSpecified if holders.nil?
+    def self.ensure_statuses(status_names)
+      raise Orp::NoStatusesSpecified if status_names.nil?
+      Status.ensure_extant(status_names)
     end
 
     # Build a stock entity and dependencies from passed options
+    #
+    # @param [String] description: A description for the entity
+    # @param [Hash] opts: Options specifying names of holders and statuses
+    # to create holdings for
+    # @returns The newly created entity
     def self.build_from_options(description, opts)
-            
+
+      # Ensure holders and statuses exist
+      self.ensure_holders(opts[:holders])
+      self.ensure_statuses(opts[:statuses])
+      
+      # Create the entity
+      entity = Entity.create(description: description)
+      
+      # Create holdings for every permutation of entity, holder, and status
+      holding_permutations(entity, opts[:holders], opts[:statuses]) do |entity, holder, status|
+        Holding.create(entity: entity, holder: holder, status: status)
+      end
+    end
+    
+    protected
+    
+    def self.holding_permutations(entity, holder_names, status_names)
+      holders  = Holder.find_union(name: holder_names)
+      statuses = Status.find_union(name: status_names)
+      holders.each do |holder|
+        statuses.each do |status|
+          yield entity, holder, status
+        end
+      end
     end
   end
 end
-#end
   

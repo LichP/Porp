@@ -6,18 +6,31 @@
 #
 # License: MIT (see LICENSE file)
 
-#module Porp
-
+class Stock
 =begin
 The StockStatus class represents different states can hold, such as 'in stock',
 'on order', etc
 =end
-class Stock
   class Status < Ohm::Model
+    include Ohm::FindAdditions
+
+    attribute  :name
+    index      :name
     attribute  :description
-    index      :description
-    collection :stock_holdings, StockHolding, :status
+    collection :holdings, Holding, :status
+
+    def validate
+      assert_unique :name
+    end
+
+    # Ensure that a status object corresponding to each passed string or symbol
+    # exists, creating it if not
+    #
+    # @param statuses Collection of strings or symbols corresponding to names
+    #   of statuses
+    def self.ensure_extant(statuses)
+      statuses = [statuses] unless statuses.kind_of?(Array)
+      statuses.each {|name| find_or_create(name: name.to_s)}
+    end
   end
 end
-#end
-  

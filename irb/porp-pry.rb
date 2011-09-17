@@ -66,13 +66,20 @@ class Ohm::Model
   end
 end
 
+#class Stock::Entity
+#  def self.const_missing(name)
+#    binding.pry
+#    Stock.const_get(name)
+#  end
+#end
+
 stock_options = {
  :holders  => [:shop, :newsagent, :ho],
  :statuses => [:futurestock, :instock, :reserved, :archived]
 }
 
 #test_stke_array = []
-1.upto(100) do |i|
+1.upto(3) do |i|
   # StockEntity.find(description: "Test stock entity #{i}").first ||
   Stock.create("Test stock entity #{i}", stock_options)
 end

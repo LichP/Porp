@@ -6,15 +6,13 @@
 #
 # License: MIT (see LICENSE file)
 
-#module Porp
-
-=begin
-The MovementTarget class represents everything that can be the target of a
-stock movement. It is subclassed by StockSourceDest, which represents
-targets which create and destroy stock, and by StockHolding, which
-represents physical stock holdings.
-=end
 class Stock
+=begin
+  The MovementTarget class represents everything that can be the target of a
+  stock movement. It is subclassed by StockSourceDest, which represents
+  targets which create and destroy stock, and by StockHolding, which
+  represents physical stock holdings.
+=end
   class MovementTarget < Ohm::Model
   
     # If inherited ensure the child gets attributes defined in higher classes
@@ -44,5 +42,4 @@ class Stock
     end
   end
 end
-#end
   

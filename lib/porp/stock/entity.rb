@@ -6,39 +6,36 @@
 #
 # License: MIT (see LICENSE file)
 
-#module Porp
-
+class Stock
 =begin
 The StockEntity class represents physical stock. Quantities of StockEntities
 are represented by StockHoldings.
 =end
-class Stock
   class Entity < Ohm::Model
     attribute  :description
     index      :description
     #set :sale_entities, SaleEntity
-    collection :stock_holdings, StockHolding, :entity
-    list       :stock_movements, StockMovement
+    collection :holdings,  Holding, :entity
+    list       :movements, Movement
 
     def create_holdings
       
     end
     
-    def holding(name)
-      stock_holdings.find(:name => name).first || StockHolding.create(name: name, entity: self)
-    end
-  
     def move(source_target, dest_target, qty, ucost)
       movement = StockMovement.move_no_cleanup(source_target:    source_target,
-                                               source_stke_id:   id,
+                                               source_entity_id:   id,
                                                source_amount:    Amount.new(qty, ucost),
                                                dest_target:      dest_target,
-                                               dest_stke_id:     id)
+                                               dest_entity_id:     id)
       # Return the completion status of the movement
       stock_movements << movement
       movement.completed
     end
-  end
+
+    def self.const_missing(name)
+      Stock.const_get(name)
+    end
+  end  
 end
-#end
   

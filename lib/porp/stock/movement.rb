@@ -6,24 +6,22 @@
 #
 # License: MIT (see LICENSE file)
 
-#module Porp
-
+class Stock
 =begin
 The StockMovement class represents movements of physical stock by moving
 quantities and cost value from one MovementTarget to another.
 =end
-class Stock
   class Movement < Ohm::Model
     include Ohm::Looseref
     include Ohm::Struct
     include Ohm::Locking
   
     looseref  :source_target, MovementTarget
-    reference :source_stke, StockEntity
+    reference :source_entity, Entity
     struct    :source_amount, Amount
 
     looseref  :dest_target, MovementTarget
-    reference :dest_stke, StockEntity
+    reference :dest_entity, Entity
     struct    :dest_amount, Amount
     
     attribute :creation_time
@@ -62,7 +60,7 @@ class Stock
       
       # Destination stock entity is assumed to be the same as the source
       # stock entity if not supplied
-      self.dest_stke_id ||= self.source_stke_id
+      self.dest_entity_id ||= self.source_entity_id
       
       # Destination quantity is assumed to be the same as the source
       # quantity if not supplied.
@@ -81,7 +79,7 @@ class Stock
       assert_present :source_target_klass
       assert_present :dest_target_id
       assert_present :dest_target_klass
-      assert_present :source_stke_id
+      assert_present :source_entity_id
     end
 
     # Commit the movement. If the movement fails, destroy the inconsistent
@@ -150,5 +148,4 @@ class Stock
     end
   end
 end
-#end
   

@@ -6,14 +6,12 @@
 #
 # License: MIT (see LICENSE file)
 
-#module Porp
-
+class Stock
 =begin
 The StockSourceDest class represents movement targets which create or
 destroy stock. Class implements a default source/destination issue and receipt
 behaviour
 =end
-class Stock
   class SourceDest < MovementTarget
     include Ohm::Locking
 
@@ -105,4 +103,3 @@ class Stock
     end
   end
 end
-#end

@@ -6,29 +6,27 @@
 #
 # License: MIT (see LICENSE file)
 
-#module Porp
-
+class Stock
 =begin
-The StockHolding class represents a collection of holdings of physical stock.
-A StockHolding is a queue of StockHoldingEntries, each of which represents a
-quantity of StockEntities. StockHoldingEntries are created and altered by
-StockMovements, and are never destroyed. The lifetime of a StockHoldingEntry
+The Holding class represents a collection of holdings of physical stock.
+A Holding is a queue of HoldingEntries, each of which represents a
+quantity of Entities. HoldingEntries are created and altered by
+Movements, and are never destroyed. The lifetime of a HoldingEntry
 will start with a receipt of stock (e.g. a GRN against a PO), and over time
-the stock represented by the StockHoldingEntry will be reduced by issues (e.g. 
+the stock represented by the HoldingEntry will be reduced by issues (e.g. 
 sales). Once a holding reaches zero it will normally be archived as part of
 the stock movement audit trail.
 
-StockHoldingEntries can be effectively merged by performing StockMovements from
-the original StockHoldingEntries to a new StockHoldingEntry, and can likewise
+HoldingEntries can be effectively merged by performing Movements from
+the original HoldingEntries to a new HoldingEntry, and can likewise
 be split in similar fashion.
 =end
-class Stock
   class Holding < MovementTarget
-    reference :entity,          StockEntity
-    reference :holder,          StockHolder
-    reference :status,          StockStatus
-    list      :entries,         StockHoldingEntry
-    list      :defunct_entries, StockHoldingEntry
+    reference :entity,          ->(id) {Entity[id]}
+    reference :holder,          ->(id) {Holder[id]}
+    reference :status,          ->(id) {Status[id]}
+    list      :entries,         ->(id) {HoldingEntry[id]}
+    list      :defunct_entries, ->(id) {HoldingEntry[id]}
     attribute :name
     index     :name
 
@@ -91,7 +89,7 @@ class Stock
     end
   end
   
-  class StockHoldingEntry < Ohm::Model
+  class HoldingEntry < Ohm::Model
     include Ohm::Callbacks
     include Ohm::Struct
     
@@ -130,5 +128,4 @@ class Stock
     end
   end
 end
-#end
   
