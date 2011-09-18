@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby1.9.1
 
-require 'pry'
-#require 'ruby-prof'
+#require 'pry'
+require 'ruby-prof'
 require 'fileutils'
 
 #$: << FileUtils.pwd.sub(/irb$/, 'lib')
@@ -66,48 +66,35 @@ class Ohm::Model
   end
 end
 
-#class Stock::Entity
-#  def self.const_missing(name)
-#    binding.pry
-#    Stock.const_get(name)
-#  end
-#end
-
 stock_options = {
  :holders  => [:shop, :newsagent, :ho],
  :statuses => [:futurestock, :instock, :reserved, :archived]
 }
 
-#test_stke_array = []
-1.upto(3) do |i|
+test_stock_array = []
+1.upto(1000) do |i|
   # StockEntity.find(description: "Test stock entity #{i}").first ||
-  Stock.create("Test stock entity #{i}", stock_options)
+#  test_stock_array << Stock.create("Test stock entity #{i}", stock_options)
+  test_stock_array << Stock[i]
 end
 
-#holding_target = test_stke.holding(:test_holding)
-#holding_target2 = test_stke.holding(:test_holding2)
 #misc_target = MiscTarget.acquire
 null_target = Stock::NullTarget.acquire
 
-binding.pry
-
-#StockEntity.all.each do |test_stke|
-##  puts test_stke.description
-#  test_stke.move(null_target, test_stke.holding(:test_holding), 10, 2.00)
-#end
-
 #binding.pry
 
-#RubyProf.start
-#StockEntity.all.each do |test_stke|
-##  puts test_stke.description
-#  test_stke.move(test_stke.holding(:test_holding), test_stke.holding(:test_holding2), 10, 2.00)
-#end
-#result = RubyProf.stop
+RubyProf.start
+# Let's acquire some stock in the new model
+test_stock_array.each do |stock|
+#  puts stock.entity.description
+  stock.entity.move(null_target, {holder: :shop, status: :instock}, 10, 2.00)
+#  puts stock.entity.holding(holder: :shop, status: :instock)
+end
+result = RubyProf.stop
 
 #binding.pry
 
 # Print a flat profile to text
-#printer = RubyProf::GraphPrinter.new(result)
+printer = RubyProf::GraphPrinter.new(result)
 #printer = RubyProf::CallTreePrinter.new(result)
-#printer.print(STDOUT, {})
+printer.print(STDOUT, {})

@@ -22,6 +22,7 @@ Error exception classes are defined here
 
   # Movement errors  
   class MovementError < Error; end
+  class MovementInvalidTarget     < MovementError; end
   class MovementValidationError   < MovementError; end
   class MovementIssueError        < MovementError; end
   class MovementRcptError         < MovementError; end  

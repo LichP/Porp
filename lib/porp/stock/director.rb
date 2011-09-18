@@ -8,17 +8,17 @@
 
 class Stock
 =begin
-The StockDirector class mediates the complex interactions between the various
-stock related classes, in particular the StockHolding class, which represents
-the actual stock, and the StockEntity, StockHolder, and StockStatus classes,
-which between them represent the three orthogonal concepts of what that stock
-is, where does it belong, and what state is it in.
+The Director class mediates the complex interactions between the various
+stock related classes, in particular the Holding class, which represents the
+actual stock, and the Entity, Holder, and Status classes, which between them
+represent the three orthogonal concepts of what that stock is, where does it
+belong, and what state is it in.
 
 The model of stock in Orp is of holdings of stock moving though various
-states and holders, with each combination of entity, holder, and status being
-represented by a StockHolding. Thus when the holder or status of a holding of
-stock changes, the stock moves from one holding to another by way of a
-StockMovement. Stock enters and leaves the system of stock holdings by way of
+states and holders, with each combination of entity, holder, and status
+being represented by a Holding.  Thus when the holder or status of a holding
+of stock changes, the stock moves from one holding to another by way of a
+Movement.  Stock enters and leaves the system of stock holdings by way of
 movements from and to non-stock MovementTargets.
 
 The model is sharded based on entity: any given stock entity requires at least
@@ -28,21 +28,11 @@ for purchase by your customers. However, the precise model is dependent on
 the requirements of a particular retail operation and their application for
 any given entity or collection of entities.
 
-It therefore falls to the StockDirector class to take the model specified by
-user configuration and apply it on a product group, stock entity, and default
+It therefore falls to the Director class to take the model specified by user
+configuration and apply it on a product group, stock entity, and default
 basis as appropriate.
 =end
   class Director
-
-    def self.ensure_holders(holder_names)
-      raise Orp::NoHoldersSpecified if holder_names.nil?
-      Holder.ensure_extant(holder_names)
-    end
-
-    def self.ensure_statuses(status_names)
-      raise Orp::NoStatusesSpecified if status_names.nil?
-      Status.ensure_extant(status_names)
-    end
 
     # Build a stock entity and dependencies from passed options
     #
@@ -53,8 +43,8 @@ basis as appropriate.
     def self.build_from_options(description, opts)
 
       # Ensure holders and statuses exist
-      self.ensure_holders(opts[:holders])
-      self.ensure_statuses(opts[:statuses])
+      ensure_holders(opts[:holders])
+      ensure_statuses(opts[:statuses])
       
       # Create the entity
       entity = Entity.create(description: description)
@@ -63,10 +53,23 @@ basis as appropriate.
       holding_permutations(entity, opts[:holders], opts[:statuses]) do |entity, holder, status|
         Holding.create(entity: entity, holder: holder, status: status)
       end
+      
+      # Return the entity
+      entity
     end
     
     protected
     
+    def self.ensure_holders(holder_names)
+      raise Orp::NoHoldersSpecified if holder_names.nil?
+      Holder.ensure_extant(holder_names)
+    end
+
+    def self.ensure_statuses(status_names)
+      raise Orp::NoStatusesSpecified if status_names.nil?
+      Status.ensure_extant(status_names)
+    end
+
     def self.holding_permutations(entity, holder_names, status_names)
       holders  = Holder.find_union(name: holder_names)
       statuses = Status.find_union(name: status_names)

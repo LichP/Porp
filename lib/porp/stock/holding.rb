@@ -25,10 +25,48 @@ be split in similar fashion.
     reference :entity,          ->(id) {Entity[id]}
     reference :holder,          ->(id) {Holder[id]}
     reference :status,          ->(id) {Status[id]}
-    list      :entries,         ->(id) {HoldingEntry[id]}
-    list      :defunct_entries, ->(id) {HoldingEntry[id]}
+    list      :entries,         HoldingEntry
+    list      :defunct_entries, HoldingEntry
     attribute :name
     index     :name
+    
+    def initialize(attrs)
+      super(attrs)
+      self.name ||= self.holder.name + "_" + self.status.name
+    end
+    
+    
+    # Calculates the total quantity of stock held in this holding from the holding
+    # entries
+    #
+    # @return [Integer] quantity of stock in the holding
+    def quantity
+      entries.all.inject(0) do |sum, entry|
+        sum += entry.amount_remaining.int_qty
+      end
+    end
+
+    # (see #quantity)
+    def qty
+      quantity
+    end
+
+    # Calculates the total value of stock held in this holding from the holding
+    # entries
+    #
+    # @return [Rational] value of stock in the holding
+    def value
+      entries.all.inject(Rational(0)) do |sum, entry|
+        sum += entry.amount_remaining.value
+      end
+    end
+    
+    # @return [String] string representation of the holding
+    def to_s
+      "Holding: %s; H: %s; S: %s; N: %s; Qty: %s; Value: %s" % [
+        id, holder_id, status_id, name, quantity, value
+      ]
+    end
 
     # Issue stock from this holding. The issue proceeds as follows:
     #
@@ -83,9 +121,13 @@ be split in similar fashion.
     # Receive stock on to this holding. For the moment, we simply create a new
     # entry each time - this may change to allow modifying entries in place
     def receive(movement)
-      entry = StockHoldingEntry.create(amount_in: movement.dest_amount)
+      entry = HoldingEntry.create(amount_in: movement.dest_amount, stock_holding_id: id)
       entries << entry
       entry.amount_in.qty
+    end
+
+    def self.const_missing(name)
+      Stock.const_get(name)
     end
   end
   
@@ -95,7 +137,7 @@ be split in similar fashion.
     
     before    :save, :mtime_update
   
-    reference :stock_holding, StockHolding
+    reference :stock_holding, Holding
     attribute :ctime
     attribute :mtime
     struct    :amount_in,  Amount
@@ -116,8 +158,8 @@ be split in similar fashion.
       Amount.new(Integer(amount_in.qty) - Integer(amount_out.qty), amount_in.ucost)
     end
 
-    # Returns whether the StockHolding is end of life. True when quantity is
-    # zero (and StockMovements > 0?)
+    # Returns whether the Holding is end of life. True when quantity is
+    # zero (and Movements > 0?)
     def eol?
       !self.amount_in.nil? &&self.amount_in.int_qty == self.amount_out.int_qty
     end
@@ -125,6 +167,10 @@ be split in similar fashion.
     # Updates the mtime attribute to the current time
     def mtime_update
       self.mtime = Time.now.to_f
+    end
+
+    def self.const_missing(name)
+      Stock.const_get(name)
     end
   end
 end

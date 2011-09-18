@@ -76,9 +76,9 @@ quantities and cost value from one MovementTarget to another.
     #  * Source stock entity
     def validate
       assert_present :source_target_id
-      assert_present :source_target_klass
+      assert_present :source_target_class
       assert_present :dest_target_id
-      assert_present :dest_target_klass
+      assert_present :dest_target_class
       assert_present :source_entity_id
     end
 
