@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby1.9.1
 
-#require 'pry'
-require 'ruby-prof'
+require 'pry'
+#require 'ruby-prof'
 require 'fileutils'
 
 #$: << FileUtils.pwd.sub(/irb$/, 'lib')
@@ -72,7 +72,7 @@ stock_options = {
 }
 
 test_stock_array = []
-1.upto(1000) do |i|
+1.upto(100) do |i|
   # StockEntity.find(description: "Test stock entity #{i}").first ||
 #  test_stock_array << Stock.create("Test stock entity #{i}", stock_options)
   test_stock_array << Stock[i]
@@ -81,18 +81,25 @@ end
 #misc_target = MiscTarget.acquire
 null_target = Stock::NullTarget.acquire
 
-#binding.pry
+binding.pry
 
-RubyProf.start
+#RubyProf.start
 # Let's acquire some stock in the new model
-test_stock_array.each do |stock|
+#test_stock_array.each do |stock|
 #  puts stock.entity.description
-  stock.entity.move(null_target, {holder: :shop, status: :instock}, 10, 2.00)
+#  stock.entity.move(null_target, {holder: :shop, status: :instock}, 10, 2.00)
 #  puts stock.entity.holding(holder: :shop, status: :instock)
-end
-result = RubyProf.stop
+#end
+#result = RubyProf.stop
 
-#binding.pry
+plu_number = 5000000100000
+test_stock_array.each do |stock|
+#  binding.pry
+  stock.entity.plus << PLU.create(value: plu_number, stock_entity: stock.entity)
+  plu_number += 1
+end
+
+binding.pry
 
 # Print a flat profile to text
 printer = RubyProf::GraphPrinter.new(result)

@@ -17,6 +17,17 @@ are represented by StockHoldings.
     #set :sale_entities, SaleEntity
     collection :holdings,  Holding, :entity
     list       :movements, Movement
+    collection :plus,      PLU, :stock_entity
+
+    # Find an entity by PLU
+    def self.find_by_plu(plu_value)
+      plu = PLU.lookup(plu_value)
+      if !plu.nil?
+        self[plu.stock_entity_id]
+      else
+        nil
+      end
+    end
 
     # Look up a holding corresponding to the passed attributes
     #
@@ -77,7 +88,11 @@ are represented by StockHoldings.
     end
 
     def self.const_missing(name)
-      Stock.const_get(name)
+      begin 
+        Stock.const_get(name)
+      rescue NameError
+        Object.const_get(name)
+      end
     end
   end  
 end

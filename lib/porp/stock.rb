@@ -19,7 +19,7 @@ require File.join(File.dirname(__FILE__), 'stock', 'status')
 class Stock
   attr_reader :entity
   
-  # Return a Stock instance for the stock entity identified by id
+  # @return A Stock instance for the stock entity identified by id
   def self.[](id)
     entity = Entity[id]
     if !entity.nil?
@@ -28,9 +28,24 @@ class Stock
       nil
     end
   end
+  
+  # Find an item of stock by PLU
+  def self.find_by_plu(plu_value)
+    entity = Entity.find_by_plu(plu_value)
+    if !entity.nil?
+      self.new(entity)
+    else
+      nil
+    end
+  end
 
   # Creates a new item of stock, including the entity and all holdings,
   # ensuring all dependencies are met i.e. all targets, holders, and statuses
+  # 
+  # @param [String] description description of the stock
+  # @param [Hash] opts stock creation options
+  #
+  # @return [Stock] the newly created item of stock
   def self.create(description = "", opts = {})
     raise Orp::NoHoldersSpecified if opts[:holders].nil?
     raise Orp::NoStatusesSpecified if opts[:statuses].nil?
@@ -40,6 +55,11 @@ class Stock
 
   def initialize(entity = nil)
     @entity = entity
+  end
+  
+  # @return The ID of the associated entity
+  def id
+    entity.id
   end
 end
 
