@@ -12,6 +12,7 @@ require 'redis/connection/hiredis'
 require 'ohm'
 require 'ohm/contrib'
 
+require File.join(File.dirname(__FILE__), 'porp', 'session')
 require File.join(File.dirname(__FILE__), 'porp', 'error')
 require File.join(File.dirname(__FILE__), 'porp', 'structs')
 require File.join(File.dirname(__FILE__), 'porp', 'stock')

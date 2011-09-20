@@ -1,0 +1,20 @@
+---
+:redis :
+    :spawn  : true
+    :config : ../redis/local.conf
+    :options:
+        :path: /tmp/redis-porp-local.sock
+:logger:
+    :output: :stdout
+    :level : :debug
+:config:
+    :stock :
+        :holders :
+            - :shop
+            - :newsagent
+            - :ho
+        :statuses:
+            - :futurestock
+            - :instock
+            - :reserved
+            - :archived

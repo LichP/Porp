@@ -14,6 +14,9 @@ Error exception classes are defined here
 
   # All porp errors are of type Orp::Error
   class Error < RuntimeError; end
+  
+  # Redis connection errors
+  class RedisNotConnected < Error; end
 
   # Stock creation errors
   class StockCreationError < Error; end

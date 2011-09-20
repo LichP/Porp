@@ -95,6 +95,7 @@ binding.pry
 plu_number = 5000000100000
 test_stock_array.each do |stock|
 #  binding.pry
+  ## Doesn't work right now: need to implement way of doing this that respects uniqueness of PLUs
   stock.entity.plus << PLU.create(value: plu_number, stock_entity: stock.entity)
   plu_number += 1
 end
