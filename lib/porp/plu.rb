@@ -9,7 +9,7 @@
 # The PLU class provides Product Look Ups. The Lookup can be a barcode number
 # or any other string identifier. Each lookup can be associated with exactly
 # one Stock, Sale, or Purchase Entity
-class PLU < Ohm::Model
+class PLU < Orp::Model
   attribute :value
   index     :value
   reference :stock_entity, Stock::Entity

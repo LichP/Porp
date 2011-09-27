@@ -11,7 +11,7 @@ class Stock
 The StockMovement class represents movements of physical stock by moving
 quantities and cost value from one MovementTarget to another.
 =end
-  class Movement < Ohm::Model
+  class Movement < Orp::Model
     include Ohm::Looseref
     include Ohm::Struct
     include Ohm::Locking
@@ -144,7 +144,24 @@ quantities and cost value from one MovementTarget to another.
         self.completed = true
         self.completion_time = Time.now.to_f
 #      end
+      Orp.logger.info(self.to_s)
       self.save
+    end
+    
+    # @return [String] string representation of a Movement
+    def to_s
+      "Movement: %s '%s' [%s] x %s @ %s > %s[%s] x %s @ %s '%s'" % [
+        completed ? '.' : '!',
+        source_entity,
+        source_target,
+        source_amount.qty,
+        source_amount.ucost,
+        dest_entity != source_entity ? "'#{dest_entity}' " : '',
+        dest_target,
+        dest_amount.qty,
+        dest_amount.ucost,
+        narrative
+      ]
     end
   end
 end

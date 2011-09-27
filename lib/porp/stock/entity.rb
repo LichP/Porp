@@ -11,7 +11,7 @@ class Stock
 The StockEntity class represents physical stock. Quantities of StockEntities
 are represented by StockHoldings.
 =end
-  class Entity < Ohm::Model
+  class Entity < Orp::Model
     attribute  :description
     index      :description
     #set :sale_entities, SaleEntity
@@ -68,8 +68,9 @@ are represented by StockHoldings.
     # @param [Integer] qty: The number of units of stock being moved.
     # @param [Rational] ucost: The cost price per unit of stock. This can be
     #   overrided by the source_target if the value of stock is already known.
+    # @param [String] narrative: Description of the movement
     # @return The completion status of the Movement
-    def move(source_target, dest_target, qty, ucost)
+    def move(source_target, dest_target, qty, ucost, narrative = '')
       # Make sure the supplied target information is valid, looking up holdings
       # as appropriate
       source_target = lookup_target(source_target)
@@ -80,11 +81,16 @@ are represented by StockHoldings.
                                           source_entity_id: id,
                                           source_amount:    Amount.new(qty, ucost),
                                           dest_target:      dest_target,
-                                          dest_entity_id:   id)
+                                          dest_entity_id:   id,
+                                          narrative:        narrative)
 
       # Return the completion status of the movement
       movements << movement
       movement.completed
+    end
+    
+    def to_s
+      description
     end
 
     def self.const_missing(name)

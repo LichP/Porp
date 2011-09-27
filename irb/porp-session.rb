@@ -8,6 +8,8 @@ require 'fileutils'
 
 require File.join(File.dirname(__FILE__), '..', 'lib', 'porp')
 
+binding.pry
+
 session = Orp::Session.load_file("../config/local.yaml")
 
 binding.pry

@@ -8,10 +8,10 @@
 
 class Stock
 =begin
-The StockStatus class represents different states can hold, such as 'in stock',
+The Status class represents different states can hold, such as 'in stock',
 'on order', etc
 =end
-  class Status < Ohm::Model
+  class Status < Orp::Model
     include Ohm::FindAdditions
 
     attribute  :name

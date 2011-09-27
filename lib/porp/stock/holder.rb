@@ -11,7 +11,7 @@ class Stock
 The StockHolder class represents holders of stock, such as outlets, stock rooms,
 warehouses, etc.
 =end
-  class Holder < Ohm::Model
+  class Holder < Orp::Model
     include Ohm::FindAdditions
   
     attribute  :name

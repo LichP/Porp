@@ -20,7 +20,7 @@ class Session
 
   # @return the current session
   def self.current
-    @@current
+    @@current || raise(SessionNotStarted)
   end
   
   # Start a new session
@@ -46,7 +46,7 @@ class Session
     @config = attrs
     
     # Initialize logger
-    @logger = Log4r::Logger.new(config.to_s)
+    @logger = Log4r::Logger.new(Process.pid.to_s)
     logger.add(Log4r::Outputter.stdout) # Use config at some point
     
     # If we need to spawn our own redis-server instance, do so now
@@ -83,4 +83,10 @@ class Model < Ohm::Model
     Ohm.threaded[self] || Orp::Session.current.redis || raise(RedisNotConnected)
   end
 end
+
+# Convenience method for accessing the logger in the current session
+def self.logger
+  Orp::Session.current.logger
+end
+
 end

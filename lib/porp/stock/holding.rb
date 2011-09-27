@@ -63,8 +63,8 @@ be split in similar fashion.
     
     # @return [String] string representation of the holding
     def to_s
-      "Holding: %s; H: %s; S: %s; N: %s; Qty: %s; Value: %s" % [
-        id, holder_id, status_id, name, quantity, value
+      "Hold: %s '%s' Q %s V %s" % [
+        id, name, quantity, value
       ]
     end
 
@@ -131,7 +131,7 @@ be split in similar fashion.
     end
   end
   
-  class HoldingEntry < Ohm::Model
+  class HoldingEntry < Orp::Model
     include Ohm::Callbacks
     include Ohm::Struct
     

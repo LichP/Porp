@@ -30,6 +30,9 @@ class Stock
   end
   
   # Find an item of stock by PLU
+  #
+  # @param plu_value: the plu to use as the lookup
+  # @return [Stock or nil] the Stock item found, if any
   def self.find_by_plu(plu_value)
     entity = Entity.find_by_plu(plu_value)
     if !entity.nil?
@@ -37,6 +40,19 @@ class Stock
     else
       nil
     end
+  end
+  
+  # @return the default options in use for Stock on this session
+  def self.defaults
+    @@defaults ||= Orp::Session.current.config[:stock]
+  end
+  
+  # Set default options
+  #
+  # @param opts: the new options
+  # @return the new options
+  def self.defaults=(opts)
+    @@defaults = opts
   end
 
   # Creates a new item of stock, including the entity and all holdings,
@@ -46,7 +62,7 @@ class Stock
   # @param [Hash] opts stock creation options
   #
   # @return [Stock] the newly created item of stock
-  def self.create(description = "", opts = {})
+  def self.create(description = "", opts = defaults)
     raise Orp::NoHoldersSpecified if opts[:holders].nil?
     raise Orp::NoStatusesSpecified if opts[:statuses].nil?
 

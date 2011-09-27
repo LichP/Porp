@@ -86,6 +86,10 @@ behaviour
     def initialize_id
       @id = "1"
     end
+    
+    def to_s
+      "Misc"
+    end
   end
   
   # Null target literally does nothing. Intended for testing only.
@@ -100,6 +104,10 @@ behaviour
 
     def receive(movement)
       true
+    end
+    
+    def to_s
+      "Null"
     end
   end
 end

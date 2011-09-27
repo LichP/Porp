@@ -17,6 +17,10 @@ Error exception classes are defined here
   
   # Redis connection errors
   class RedisNotConnected < Error; end
+  
+  # Session errors
+  class SessionError < Error; end
+  class SessionNotStarted < SessionError; end
 
   # Stock creation errors
   class StockCreationError < Error; end

@@ -13,7 +13,7 @@ class Stock
   targets which create and destroy stock, and by StockHolding, which
   represents physical stock holdings.
 =end
-  class MovementTarget < Ohm::Model
+  class MovementTarget < Orp::Model
   
     # If inherited ensure the child gets attributes defined in higher classes
     def self.inherited(subclass)
