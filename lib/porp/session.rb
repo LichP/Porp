@@ -7,7 +7,7 @@
 # License: MIT (see LICENSE file)
 
 require 'log4r'
-require 'redis'
+require 'redis/spawn'
 
 module Orp
 
@@ -52,28 +52,11 @@ class Session
     # If we need to spawn our own redis-server instance, do so now
     if config[:redis][:spawn]
       # May need to trap exceptions here
-      spawn_redis(config[:redis][:config])
+      @spawned_server = Redis.spawn(:server_opts => config[:redis][:server_opts])
     end
     
     # Connect to redis
     @redis = Redis.connect(config[:redis][:options])
-  end
-  
-  protected
-  
-  # Spawn a redis server instance for use with this session
-  # @param [String] config_fn: the name of the config file
-  # @return [Int or nil] PID of the child running redis-server
-  def spawn_redis(config_fn)    
-    # Make sure we clean up after our children and avoid a zombie invasion
-    trap("CLD") do
-      pid = Process.wait
-    end
-    # @todo sanity check config_fn
-    pid = fork { exec("redis-server #{config_fn}") }
-    logger.info("Spawned redis server with PID #{pid}")
-    at_exit { Process.kill("TERM", pid) } # Maybe make this configurable to allow the server to continue after exit
-    pid
   end
 end
 

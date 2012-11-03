@@ -1,18 +1,22 @@
 ---
-:redis :
-    :spawn  : true
-    :config : ../redis/local.conf
-    :options:
-        :path: /tmp/redis-porp-local.sock
-:logger:
-    :output: :stdout
-    :level : :debug
-:stock :
-    :holders :
+:redis  :
+    :spawn      : true
+    :options    :
+        :path   : /tmp/redis-porp-local.sock
+    :server_opts:
+        :pidfile    : /tmp/redis-porp-local.pid
+        :unixsocket : /tmp/redis-porp-local.sock
+        :logfile    : /tmp/redis-porp-local.log
+        :dir        : /tmp/redis-porp-local        
+:logger :
+    :output :   :stdout
+    :level  :   :debug
+:stock  :
+    :holders:
         - :shop
         - :newsagent
         - :ho
-    :statuses:
+    :statuses   :
         - :futurestock
         - :instock
         - :reserved
